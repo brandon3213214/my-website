@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>测测你在异性眼中的第一印象</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- 引入 Chart.js 用于制作饼图和雷达图 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- 引入 ChartDataLabels 插件，用于直接在图表上显示文字 -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', 'Noto Serif SC', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #FAF7F2;
+      color: #2D2926;
+    }
+    .serif-title { font-family: 'Noto Serif SC', serif; }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+    .btn-gradient {
+      background: linear-gradient(135deg, #E8A598 0%, #C86D51 100%);
+    }
+    .option-card {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .option-card:active {
+      transform: scale(0.98);
+    }
+    .progress-bar-inner {
+      transition: width 0.3s ease-out;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between max-w-md mx-auto relative overflow-x-hidden bg-[#FAF7F2] antialiased">
+
+  <!-- 背景装饰光晕 -->
+  <div class="fixed top-[-10%] left-[-10%] w-72 h-72 bg-[#F3D3C4] rounded-full blur-3xl opacity-40 pointer-events-none"></div>
+  <div class="fixed bottom-[-10%] right-[-10%] w-80 h-80 bg-[#E8C5B0] rounded-full blur-3xl opacity-40 pointer-events-none"></div>
+
+  <main class="flex-1 px-5 py-6 flex flex-col justify-center relative z-10">
+
+    <!-- 1. 首页 Landing Screen -->
+    <div id="screen-home" class="flex flex-col items-center text-center space-y-6 my-auto">
+      <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-[#E8A598]/15 border border-[#E8A598]/30 text-[#C86D51] text-xs font-semibold tracking-wider">
+        <span>✦</span>
+        <span>深度心理学视觉投射 (15题图表版)</span>
+        <span>✦</span>
+      </div>
+
+      <div class="space-y-3">
+        <h1 class="text-3xl font-bold tracking-tight text-[#2D2926] serif-title leading-tight">
+          测测你在异性眼中的<br><span class="text-[#C86D51]">第一印象构成</span>
+        </h1>
+        <p class="text-sm text-[#7A7269] max-w-xs mx-auto leading-relaxed">
+          15 道情景题 · 生成异性视角的【成分占比饼图】与【5维气场雷达图】
+        </p>
+      </div>
+
+      <div class="w-full glass-card p-6 rounded-2xl shadow-xl shadow-[#2D2926]/5 space-y-5 text-left border border-white">
+        <div>
+          <label class="block text-xs font-bold text-[#7A7269] uppercase tracking-wider mb-2">你的昵称</label>
+          <input type="text" id="user-name" placeholder="请输入你的昵称" class="w-full px-4 py-3 rounded-xl bg-white/80 border border-[#E5DEC9] focus:outline-none focus:ring-2 focus:ring-[#C86D51]/50 text-sm font-medium">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-[#7A7269] uppercase tracking-wider mb-2">你的性别（用于精准话术分析）</label>
+          <div class="grid grid-cols-2 gap-3">
+            <button type="button" onclick="selectGender('female')" id="gender-female" class="gender-btn py-2.5 px-4 rounded-xl border border-[#E5DEC9] bg-white text-sm font-medium text-[#7A7269] flex items-center justify-center space-x-2 transition-all">
+              <span>♀</span> <span>女生</span>
+            </button>
+            <button type="button" onclick="selectGender('male')" id="gender-male" class="gender-btn py-2.5 px-4 rounded-xl border border-[#E5DEC9] bg-white text-sm font-medium text-[#7A7269] flex items-center justify-center space-x-2 transition-all">
+              <span>♂</span> <span>男生</span>
+            </button>
+          </div>
+        </div>
+
+        <button onclick="startQuiz()" class="w-full py-3.5 px-6 rounded-xl btn-gradient text-white font-semibold text-base shadow-lg shadow-[#C86D51]/25 hover:opacity-95 active:scale-[0.99] transition-all text-center">
+          开始测试
+        </button>
+      </div>
+
+      <p class="text-xs text-[#A39B8E] flex items-center space-x-1">
+        <span>🔒</span> <span>已通过心理学语义模型校验 · 仅展示个人报告</span>
+      </p>
+    </div>
+
+    <!-- 2. 答题 Screen -->
+    <div id="screen-quiz" class="hidden flex-col flex-1 justify-between my-auto">
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <span id="quiz-step" class="text-xs font-bold text-[#C86D51] tracking-wider uppercase">QUESTION 01/15</span>
+          <span id="quiz-percent" class="text-xs font-semibold text-[#7A7269]">6%</span>
+        </div>
+        <div class="w-full bg-[#E5DEC9]/50 h-1.5 rounded-full overflow-hidden mb-8">
+          <div id="quiz-progress" class="bg-[#C86D51] h-full w-[6.66%] progress-bar-inner"></div>
+        </div>
+
+        <div class="space-y-6">
+          <h2 id="quiz-question" class="text-xl font-bold text-[#2D2926] serif-title leading-snug">
+            题目加载中...
+          </h2>
+          <div id="quiz-options" class="space-y-3"></div>
+        </div>
+      </div>
+
+      <div class="mt-8 text-center">
+        <button id="prev-btn" onclick="prevQuestion()" class="text-xs text-[#7A7269] underline underline-offset-4 hidden">返回上一题</button>
+      </div>
+    </div>
+
+    <!-- 3. AI计算/加载 Screen -->
+    <div id="screen-loading" class="hidden flex-col items-center justify-center text-center space-y-6 my-auto py-12">
+      <div class="relative w-24 h-24 flex items-center justify-center">
+        <div class="absolute inset-0 border-4 border-[#E8A598]/20 rounded-full"></div>
+        <div class="absolute inset-0 border-4 border-[#C86D51] border-t-transparent rounded-full animate-spin"></div>
+        <span class="text-2xl">✨</span>
+      </div>
+      <div class="space-y-2">
+        <h3 class="text-lg font-bold text-[#2D2926] serif-title">正在生成可视化印象报告...</h3>
+        <p id="loading-tip" class="text-xs text-[#7A7269] transition-opacity duration-300">渲染印象饼图与气场雷达图...</p>
+      </div>
+    </div>
+
+    <!-- 4. 报告 Screen -->
+    <div id="screen-report" class="hidden flex-col space-y-6 my-auto">
+      <div id="report-poster" class="glass-card p-6 rounded-2xl shadow-xl space-y-6 border border-white bg-gradient-to-b from-white/95 to-[#FAF7F2]/90 relative overflow-hidden">
+        <div class="flex items-center justify-between border-b border-[#E5DEC9]/60 pb-4">
+          <div>
+            <span class="text-xs font-bold text-[#C86D51] uppercase tracking-wider">VISUAL IMPRESSION REPORT</span>
+            <h2 class="text-xl font-bold text-[#2D2926] serif-title mt-0.5"><span id="report-user-name">用户</span> 的异性第一印象</h2>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-[#E8A598]/20 flex items-center justify-center text-lg font-serif text-[#C86D51]" id="report-avatar-letter">
+            印
+          </div>
+        </div>
+
+        <div class="text-center py-3 bg-[#FAF7F2] rounded-xl border border-[#E5DEC9]/40 space-y-1">
+          <span class="text-xs text-[#7A7269]">你的异性吸引力主气场</span>
+          <div id="report-title" class="text-2xl font-extrabold text-[#C86D51] serif-title">高冷清冽 · 雪松系</div>
+          <div id="report-tags" class="flex flex-wrap justify-center gap-1.5 pt-1 px-3"></div>
+        </div>
+
+        <!-- 📊 创意 1：第一印象成分占比饼图（数值直接显现） -->
+        <div class="space-y-3 bg-white/70 p-4 rounded-xl border border-[#E5DEC9]/50">
+          <div class="text-xs font-bold text-[#2D2926] flex items-center justify-between">
+            <span>🍰 异性看你时的【印象成分占比】</span>
+            <span class="text-[10px] text-[#A39B8E]">潜意识构成</span>
+          </div>
+          <div class="w-52 h-52 mx-auto relative">
+            <canvas id="pieChart"></canvas>
+          </div>
+          <!-- 静态明细说明：无需鼠标悬停，直接看懂数值 -->
+          <div id="pie-legend-details" class="grid grid-cols-2 gap-2 pt-2 border-t border-[#E5DEC9]/50 text-xs"></div>
+        </div>
+
+        <!-- 📊 创意 2：5维气场蜘蛛雷达图 -->
+        <div class="space-y-2 bg-white/70 p-4 rounded-xl border border-[#E5DEC9]/50">
+          <div class="text-xs font-bold text-[#2D2926] flex items-center justify-between">
+            <span>🕸️ 5 维社交气场模型</span>
+            <span class="text-[10px] text-[#A39B8E]">气场剖面图</span>
+          </div>
+          <div class="w-full h-52 mx-auto relative">
+            <canvas id="radarChart"></canvas>
+          </div>
+        </div>
+
+        <!-- 深度分析文字板块 -->
+        <div class="space-y-3.5 text-xs leading-relaxed text-[#2D2926]">
+          <div class="p-3.5 rounded-xl bg-white/80 border border-[#E5DEC9]/50 space-y-1">
+            <div class="font-bold text-[#C86D51]">👁️ 视觉第一落点（第一眼气场）：</div>
+            <p id="report-first-eye" class="text-[#7A7269]"></p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-white/80 border border-[#E5DEC9]/50 space-y-1">
+            <div class="font-bold text-[#C86D51]">💡 致命隐秘特质（让人着迷的原因）：</div>
+            <p id="report-charm" class="text-[#7A7269]"></p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-white/80 border border-[#E5DEC9]/50 space-y-1">
+            <div class="font-bold text-[#C86D51]">🌡️ 微表情与情绪拉扯节奏：</div>
+            <p id="report-micro" class="text-[#7A7269]"></p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-white/80 border border-[#E5DEC9]/50 space-y-1">
+            <div class="font-bold text-[#C86D51]">💘 命定吸引异性类型（拿捏对象）：</div>
+            <p id="report-match" class="text-[#7A7269]"></p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-white/80 border border-[#E5DEC9]/50 space-y-1">
+            <div class="font-bold text-[#C86D51]">⚠️ 社交避坑与突破指南：</div>
+            <p id="report-warning" class="text-[#7A7269]"></p>
+          </div>
+        </div>
+
+        <!-- 底部落款 -->
+        <div class="pt-2 border-t border-[#E5DEC9]/60 flex items-center justify-between text-[10px] text-[#A39B8E]">
+          <div>
+            <div>扫码测测你的异性第一印象</div>
+            <div class="font-serif italic mt-0.5 text-[#7A7269]">First Impression Test</div>
+          </div>
+          <div class="w-12 h-12 bg-white p-1 rounded-lg border border-[#E5DEC9] shadow-sm flex items-center justify-center text-center text-[8px] text-[#7A7269]">
+            二维码位置
+          </div>
+        </div>
+      </div>
+
+      <!-- 底部操作按钮 -->
+      <div class="space-y-3">
+        <button onclick="generatePoster()" class="w-full py-3.5 px-6 rounded-xl btn-gradient text-white font-semibold text-sm shadow-lg shadow-[#C86D51]/25 flex items-center justify-center space-x-2">
+          <span>📸</span> <span>生成朋友圈高颜值海报</span>
+        </button>
+        <button onclick="restartQuiz()" class="w-full py-3 px-6 rounded-xl border border-[#E5DEC9] bg-white text-[#7A7269] font-medium text-xs text-center">
+          重新测试
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    const questions = [
+      {
+        q: "在朋友聚会中，当你第一次走进一个有陌生异性的房间，你通常会？",
+        options: [
+          { text: "眼神自然环视一周，微笑着找空位坐下", score: { cedar: 2, sun: 3, sheep: 2, wood: 1 } },
+          { text: "有些局促，快速走到熟人旁边低头坐下", score: { cedar: 1, sun: 0, sheep: 3, wood: 2 } },
+          { text: "气场全开，主动与大家打招呼并找话题", score: { cedar: 0, sun: 4, sheep: 0, wood: 1 } },
+          { text: "保持礼貌克制，找个安静角落观察全场", score: { cedar: 4, sun: 0, sheep: 1, wood: 3 } }
+        ]
+      },
+      {
+        q: "异性第一次跟你眼神对视时，你的第一反应通常是？",
+        options: [
+          { text: "落落大方地迎上对方视线，停留1-2秒再移开", score: { cedar: 3, sun: 3, sheep: 0, wood: 2 } },
+          { text: "有点害羞，立刻不好意思地把视线移开", score: { cedar: 0, sun: 1, sheep: 4, wood: 1 } },
+          { text: "挑眉或微微一笑，给对方一个回应", score: { cedar: 1, sun: 4, sheep: 1, wood: 1 } },
+          { text: "面无表情地移开视线，让人看不穿心思", score: { cedar: 4, sun: 0, sheep: 0, wood: 3 } }
+        ]
+      },
+      {
+        q: "去咖啡馆或餐厅时，你最希望给初次见面的异性留下怎样的视觉感觉？",
+        options: [
+          { text: "干净利落、衣品极佳且带有高级感", score: { cedar: 4, sun: 1, sheep: 0, wood: 3 } },
+          { text: "阳光活泼、充满生命力与好情绪", score: { cedar: 0, sun: 4, sheep: 2, wood: 0 } },
+          { text: "温柔随和、没有任何攻击性与压迫感", score: { cedar: 0, sun: 1, sheep: 4, wood: 2 } },
+          { text: "沉稳知性、说话有条不紊且值得信赖", score: { cedar: 2, sun: 0, sheep: 1, wood: 4 } }
+        ]
+      },
+      {
+        q: "如果异性讲了一个并不怎么好笑的笑话，你会？",
+        options: [
+          { text: "很给面子地大笑，并顺着对方的话往下聊", score: { cedar: 0, sun: 4, sheep: 2, wood: 0 } },
+          { text: "礼貌性地微笑，但不会强行捧场", score: { cedar: 2, sun: 1, sheep: 2, wood: 3 } },
+          { text: "温柔地看着对方，用眼神化解尴尬", score: { cedar: 1, sun: 1, sheep: 4, wood: 1 } },
+          { text: "直白或幽默地调侃一句“这也太冷了吧”", score: { cedar: 3, sun: 2, sheep: 0, wood: 1 } }
+        ]
+      },
+      {
+        q: "在与异性初次聊天时，你的语言节奏是怎样的？",
+        options: [
+          { text: "语速偏快、充满热情，容易带动现场气氛", score: { cedar: 0, sun: 4, sheep: 1, wood: 0 } },
+          { text: "语速适中、声音温和，习惯听多于说", score: { cedar: 1, sun: 0, sheep: 3, wood: 4 } },
+          { text: "语调平缓、用词精准，带有淡淡的疏离感", score: { cedar: 4, sun: 0, sheep: 0, wood: 2 } },
+          { text: "声音轻柔，偶尔会因为紧张而有点磕绊", score: { cedar: 0, sun: 1, sheep: 4, wood: 1 } }
+        ]
+      },
+      {
+        q: "你觉得自己在异性面前最吸引人的一瞬间是？",
+        options: [
+          { text: "认真专注于某件事、眼神笃定的时候", score: { cedar: 4, sun: 1, sheep: 0, wood: 3 } },
+          { text: "毫无顾忌大笑、展露真诚笑容的时候", score: { cedar: 0, sun: 4, sheep: 2, wood: 0 } },
+          { text: "体贴关怀他人、展现温柔细节的时候", score: { cedar: 0, sun: 1, sheep: 4, wood: 3 } },
+          { text: "偶尔展露反差萌或小狐狸般古灵精怪的时候", score: { cedar: 2, sun: 3, sheep: 1, wood: 0 } }
+        ]
+      },
+      {
+        q: "初次见面散步时，如果你与异性无意间碰到了手臂，你会？",
+        options: [
+          { text: "像触电一样快速收回，脸微微泛红", score: { cedar: 0, sun: 1, sheep: 4, wood: 1 } },
+          { text: "自然地调整距离，保持礼貌的安全分寸", score: { cedar: 2, sun: 0, sheep: 1, wood: 4 } },
+          { text: "完全不在意，甚至自然地顺势做个肢体互动", score: { cedar: 1, sun: 4, sheep: 0, wood: 0 } },
+          { text: "表面波澜不惊，但内心已经开始默默评估对方", score: { cedar: 4, sun: 0, sheep: 0, wood: 2 } }
+        ]
+      },
+      {
+        q: "异性送你回家到达楼下，离别时你通常会？",
+        options: [
+          { text: "真诚感谢，挥手道别并目送对方离开", score: { cedar: 1, sun: 2, sheep: 3, wood: 2 } },
+          { text: "笑着开玩笑“今天表现不错，下次再聚”", score: { cedar: 1, sun: 4, sheep: 0, wood: 1 } },
+          { text: "礼貌道谢，转身干净利落地上楼", score: { cedar: 4, sun: 0, sheep: 0, wood: 2 } },
+          { text: "有点舍不得，一步三回头或发微信确认对方到家", score: { cedar: 0, sun: 1, sheep: 4, wood: 1 } }
+        ]
+      },
+      {
+        q: "如果异性对你提出了一个你不太赞同的观点，你会？",
+        options: [
+          { text: "直接阐述自己的不同见解，逻辑清晰地论证", score: { cedar: 3, sun: 2, sheep: 0, wood: 3 } },
+          { text: "委婉附和或选择沉默，不想破坏气氛", score: { cedar: 0, sun: 1, sheep: 4, wood: 2 } },
+          { text: "用开玩笑的方式把话题转移开", score: { cedar: 0, sun: 3, sheep: 1, wood: 1 } },
+          { text: "倾听对方理由，平静地说“有意思的视角”", score: { cedar: 3, sun: 0, sheep: 1, wood: 4 } }
+        ]
+      },
+      {
+        q: "如果用一种植物或气味来形容你给异性的第一感觉，你觉得是？",
+        options: [
+          { text: "高山雪松/冷冽香草，带有冰冷与清高", score: { cedar: 4, sun: 0, sheep: 0, wood: 1 } },
+          { text: "盛夏柑橘/向日葵，充满阳光与热烈", score: { cedar: 0, sun: 4, sheep: 1, wood: 0 } },
+          { text: "棉花/热牛奶，软糯治愈且温暖", score: { cedar: 0, sun: 0, sheep: 4, wood: 1 } },
+          { text: "沉香木/老茶，底蕴深厚且让人安心", score: { cedar: 1, sun: 0, sheep: 1, wood: 4 } }
+        ]
+      },
+      {
+        q: "初次见面的异性在微信上连续半天没回复你的消息，你会？",
+        options: [
+          { text: "完全不在意，该干嘛干嘛，甚至忘了这事", score: { cedar: 4, sun: 2, sheep: 0, wood: 2 } },
+          { text: "内心开始胡思乱想“我是不是说错话了”", score: { cedar: 0, sun: 0, sheep: 4, wood: 1 } },
+          { text: "过几个小时发个有趣的表情包或新闻试探一下", score: { cedar: 0, sun: 4, sheep: 1, wood: 0 } },
+          { text: "静静等待，对方回复后再按相同时间间隔回复", score: { cedar: 2, sun: 0, sheep: 1, wood: 4 } }
+        ]
+      },
+      {
+        q: "你认为自己在异性眼中的“神秘感”指数如何？",
+        options: [
+          { text: "非常高，别人总觉得看不透我、猜不透我在想什么", score: { cedar: 4, sun: 0, sheep: 0, wood: 2 } },
+          { text: "几乎没有，我是个极度直爽的“阳光透明人”", score: { cedar: 0, sun: 4, sheep: 1, wood: 0 } },
+          { text: "中等，相处久了就会发现我很单纯好懂", score: { cedar: 0, sun: 1, sheep: 4, wood: 1 } },
+          { text: "像一本厚书，初看规矩，越翻越有意思", score: { cedar: 2, sun: 0, sheep: 0, wood: 4 } }
+        ]
+      },
+      {
+        q: "在社交平台上发布朋友圈或动态时，你更倾向于哪种风格？",
+        options: [
+          { text: "精修风景/艺术展/低调的文字，很少发自拍", score: { cedar: 4, sun: 0, sheep: 1, wood: 3 } },
+          { text: "搞怪搞笑/生活日常/与朋友的疯玩合照", score: { cedar: 0, sun: 4, sheep: 2, wood: 0 } },
+          { text: "分享可爱的宠物、美食或治愈的小细节", score: { cedar: 0, sun: 1, sheep: 4, wood: 1 } },
+          { text: "分享读书心得、工作高光或有深度的行业观点", score: { cedar: 2, sun: 0, sheep: 0, wood: 4 } }
+        ]
+      },
+      {
+        q: "如果服务员在初次聚会时不小心把水泼到了你的衣服上，你会？",
+        options: [
+          { text: "平静地拿纸巾擦拭，安慰服务员“没事，别紧张”", score: { cedar: 2, sun: 1, sheep: 2, wood: 4 } },
+          { text: "用幽默化解尴尬“哈哈刚好今天帮我省了干洗费”", score: { cedar: 0, sun: 4, sheep: 1, wood: 0 } },
+          { text: "微愣一下，有点手足无措地看向身边的朋友", score: { cedar: 0, sun: 0, sheep: 4, wood: 1 } },
+          { text: "眼神瞬间变冷，但依然克制地处理，显露出极强的气场", score: { cedar: 4, sun: 0, sheep: 0, wood: 2 } }
+        ]
+      },
+      {
+        q: "在关系暧昧期，如果异性突然对你展示出极强的占有欲，你会？",
+        options: [
+          { text: "内心警惕，开始后退并重新拉开安全距离", score: { cedar: 4, sun: 0, sheep: 1, wood: 3 } },
+          { text: "感到被重视，心里暗爽并给予积极回应", score: { cedar: 0, sun: 3, sheep: 3, wood: 0 } },
+          { text: "顺从对方，甚至表现出更多的依恋", score: { cedar: 0, sun: 1, sheep: 4, wood: 1 } },
+          { text: "冷静地与对方沟通界限，保持独立性", score: { cedar: 2, sun: 1, sheep: 0, wood: 4 } }
+        ]
+      }
+    ];
+
+    const results = {
+      cedar: {
+        title: "高冷清冽 · 雪松系",
+        tags: ["#高岭之花", "#极致神秘感", "#高智感", "#反向拉扯大师"],
+        pieData: [52, 28, 12, 8],
+        pieLabels: ["高级疏离感", "潜在征服欲", "偶尔温情", "隐秘情绪"],
+        radarData: [95, 40, 98, 88, 55],
+        firstEye: "异性注意到你的第一眼，会被你身上那种‘疏离’与‘高贵克制’的气场吸引。你周身竖着一道看不见的防线，眼神冷静，不主动讨好任何人，像是在风雪中独立的高山雪松。",
+        charm: "极度克制的神秘感与反向拉扯。你越是不表态、越是不迎合，异性对你的探索欲就越呈指数级飙升。对异性而言，能博得你的一个微笑，会带来巨大的心理成就感。",
+        micro: "微表情极其稳定，极少表现出惊慌或奉承。与异性眼神碰撞时，你会平静移开或淡淡注视，制造出强烈的‘情绪拉扯与被掌控感’。",
+        match: "极度偏爱征服欲强、高智感、自信或极具猎手特质的异性。这类人会在你的‘疏离感’面前彻底沦陷。",
+        warning: "容易让性格腼腆的追求者望而生畏。适时展露一点小迷糊会爆发核弹级反差萌。"
+      },
+      sun: {
+        title: "热烈耀眼 · 日光系",
+        tags: ["#快乐小太阳", "#毫无防备感", "#情绪价值拉满", "#自带高光"],
+        pieData: [55, 25, 12, 8],
+        pieLabels: ["热烈生命力", "治愈包容心", "直爽真诚", "调侃幽默"],
+        radarData: [20, 98, 75, 88, 70],
+        firstEye: "异性第一眼看到你，就会被你身上充沛的生命力与真诚的笑意所打动。你的姿态舒展自然，没有任何阴暗的攻击性，像是一束驱散阴霾的夏日阳光。",
+        charm: "无可替代的生命力与情绪价值。和你在一起没有任何压迫感，异性会非常愿意向你倾诉内心深处的秘密，甚至对你卸下所有防线。",
+        micro: "表情丰富自然，眼神真诚且带有温度。异性讲笑话时你大方回应，极其亲和，能瞬间拉近两人的心理距离。",
+        match: "最吸引性格内向、稍微焦虑、或者平时工作压力极大的‘高压/沉闷型’异性。",
+        warning: "因为太容易打成一片，有时会被异性误分类为‘好哥们’，少了一丝暧昧期应有的男女拉扯感。"
+      },
+      sheep: {
+        title: "软糯治愈 · 绵羊系",
+        tags: ["#激发保护欲", "#无害感", "#温柔陷阱", "#让人想靠近"],
+        pieData: [50, 30, 12, 8],
+        pieLabels: ["无害保护欲", "温柔治愈力", "乖巧依赖", "偶尔执拗"],
+        radarData: [30, 90, 68, 95, 65],
+        firstEye: "在异性眼中，你第一眼给人的感觉是‘柔软、清澈且极度无害’。微微害羞的眼神与温和的音调，能瞬间激发对方内心的保护欲。",
+        charm: "极致的治愈感与无压迫感。与你相处时，异性内心深处的戒备会完全放下，感觉被包容与尊重，产生强烈的想要照顾你、守护你的冲动。",
+        micro: "眼神偶尔闪烁，肢体动作礼貌而小心翼翼。被触碰或突然被注视时会微微愣住，这种微小的‘不自然’在异性眼里可爱至极。",
+        match: "天然吸引具有强控制欲、大男子/大女子主义、或者内心富有责任感的强有力异性。",
+        warning: "初次见面容易显得过于顺从，适时展露一点自己的原则与脾气，魅力会翻倍。"
+      },
+      wood: {
+        title: "温润沉稳 · 木质系",
+        tags: ["#极度靠谱", "#知性底蕴", "#情绪稳定", "#耐看型气场"],
+        pieData: [48, 32, 12, 8],
+        pieLabels: ["情绪稳定性", "知性睿智感", "安稳踏实", "隐秘浪漫"],
+        radarData: [55, 75, 85, 98, 92],
+        firstEye: "你给异性的第一印象不是夺目的惊艳，而是‘极为舒缓、沉稳与知性’。谈吐有条不紊，眼神安定，给人一种靠谱的成熟气场。",
+        charm: "极高的情绪稳定性与知性底蕴。异性在和你深度交谈后，会被你丰富的内心世界和极高的情商所折服，属于典型的‘第二眼惊艳、越相处越上头’类型。",
+        micro: "倾听时眼神专注，回应时语调平缓精准。不急于表达自己，却总能在关键时刻给出睿智或体贴的回应。",
+        match: "极易吸引寻求长期稳定关系、看重精神共鸣与高品质陪伴的优质成熟异性。",
+        warning: "慢热的性格需要时间来展现魅力，在短时间的速配社交中容易显得过于低调。"
+      }
+    };
+
+    let userData = { name: "", gender: "" };
+    let currentQuestion = 0;
+    let scores = { cedar: 0, sun: 0, sheep: 0, wood: 0 };
+    let answersHistory = [];
+    let pieChartInstance = null;
+    let radarChartInstance = null;
+
+    function selectGender(gender) {
+      userData.gender = gender;
+      const femaleBtn = document.getElementById('gender-female');
+      const maleBtn = document.getElementById('gender-male');
+
+      femaleBtn.className = "gender-btn py-2.5 px-4 rounded-xl border border-[#E5DEC9] bg-white text-sm font-medium text-[#7A7269] flex items-center justify-center space-x-2 transition-all";
+      maleBtn.className = "gender-btn py-2.5 px-4 rounded-xl border border-[#E5DEC9] bg-white text-sm font-medium text-[#7A7269] flex items-center justify-center space-x-2 transition-all";
+
+      if (gender === 'female') {
+        femaleBtn.className = "gender-btn py-2.5 px-4 rounded-xl border-2 border-[#C86D51] bg-[#E8A598]/15 text-[#C86D51] font-bold flex items-center justify-center space-x-2 transition-all shadow-sm";
+      } else {
+        maleBtn.className = "gender-btn py-2.5 px-4 rounded-xl border-2 border-[#C86D51] bg-[#E8A598]/15 text-[#C86D51] font-bold flex items-center justify-center space-x-2 transition-all shadow-sm";
+      }
+    }
+
+    function startQuiz() {
+      const nameInput = document.getElementById('user-name').value.trim();
+      if (!nameInput) {
+        alert('请输入你的昵称后再开始测试哦！');
+        return;
+      }
+      if (!userData.gender) {
+        alert('请选择你的性别！');
+        return;
+      }
+      userData.name = nameInput;
+
+      document.getElementById('screen-home').classList.add('hidden');
+      document.getElementById('screen-quiz').classList.remove('hidden');
+      document.getElementById('screen-quiz').classList.add('flex');
+
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = questions[currentQuestion];
+      document.getElementById('quiz-step').innerText = `QUESTION ${String(currentQuestion + 1).padStart(2, '0')}/15`;
+      const pct = Math.round(((currentQuestion + 1) / 15) * 100);
+      document.getElementById('quiz-percent').innerText = `${pct}%`;
+      document.getElementById('quiz-progress').style.width = `${pct}%`;
+      document.getElementById('quiz-question').innerText = q.q;
+
+      const optionsContainer = document.getElementById('quiz-options');
+      optionsContainer.innerHTML = '';
+
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-card w-full p-4 rounded-xl glass-card text-left text-xs font-medium text-[#2D2926] border border-white hover:border-[#C86D51]/50 flex items-center justify-between space-x-3 shadow-sm bg-white/80';
+        btn.innerHTML = `
+          <span class="flex-1">${opt.text}</span>
+          <span class="w-5 h-5 rounded-full border border-[#E5DEC9] flex items-center justify-center text-[10px] text-[#A39B8E] shrink-0">${String.fromCharCode(65 + idx)}</span>
+        `;
+        btn.onclick = () => selectOption(opt.score);
+        optionsContainer.appendChild(btn);
+      });
+
+      if (currentQuestion > 0) {
+        document.getElementById('prev-btn').classList.remove('hidden');
+      } else {
+        document.getElementById('prev-btn').classList.add('hidden');
+      }
+    }
+
+    function selectOption(scoreObj) {
+      answersHistory.push(scoreObj);
+      for (let k in scoreObj) {
+        scores[k] += scoreObj[k];
+      }
+
+      if (currentQuestion < questions.length - 1) {
+        currentQuestion++;
+        renderQuestion();
+      } else {
+        finishQuiz();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentQuestion > 0) {
+        const lastScore = answersHistory.pop();
+        for (let k in lastScore) {
+          scores[k] -= lastScore[k];
+        }
+        currentQuestion--;
+        renderQuestion();
+      }
+    }
+
+    function finishQuiz() {
+      document.getElementById('screen-quiz').classList.add('hidden');
+      document.getElementById('screen-quiz').classList.remove('flex');
+      document.getElementById('screen-loading').classList.add('hidden');
+      document.getElementById('screen-loading').classList.remove('flex');
+      // 直接展示报告
+      showReport();
+    }
+
+    function showReport() {
+      document.getElementById('screen-loading').classList.add('hidden');
+      document.getElementById('screen-loading').classList.remove('flex');
+      document.getElementById('screen-report').classList.remove('hidden');
+      document.getElementById('screen-report').classList.add('flex');
+
+      let topType = 'cedar';
+      let maxScore = -1;
+      for (let k in scores) {
+        if (scores[k] > maxScore) {
+          maxScore = scores[k];
+          topType = k;
+        }
+      }
+
+      const res = results[topType];
+      document.getElementById('report-user-name').innerText = userData.name;
+      document.getElementById('report-avatar-letter').innerText = userData.name.charAt(0) || '印';
+      document.getElementById('report-title').innerText = res.title;
+
+      const tagsContainer = document.getElementById('report-tags');
+      tagsContainer.innerHTML = '';
+      res.tags.forEach(t => {
+        const span = document.createElement('span');
+        span.className = 'px-2 py-0.5 rounded-md bg-[#E8A598]/15 text-[#C86D51] text-[10px] font-medium';
+        span.innerText = t;
+        tagsContainer.appendChild(span);
+      });
+
+      document.getElementById('report-first-eye').innerText = res.firstEye;
+      document.getElementById('report-charm').innerText = res.charm;
+      document.getElementById('report-micro').innerText = res.micro;
+      document.getElementById('report-match').innerText = res.match;
+      document.getElementById('report-warning').innerText = res.warning;
+
+      // 渲染饼图下方的静态文本明细（直接显示，不悬停）
+      const legendContainer = document.getElementById('pie-legend-details');
+      legendContainer.innerHTML = '';
+      const colors = ['#C86D51', '#E8A598', '#E5DEC9', '#7A7269'];
+      res.pieLabels.forEach((label, idx) => {
+        const val = res.pieData[idx];
+        const div = document.createElement('div');
+        div.className = "flex items-center space-x-1.5 bg-white/90 p-1.5 rounded-lg border border-[#E5DEC9]/40";
+        div.innerHTML = `
+          <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${colors[idx]}"></span>
+          <span class="text-[#7A7269] truncate">${label}</span>
+          <span class="font-bold text-[#2D2926] ml-auto">${val}%</span>
+        `;
+        legendContainer.appendChild(div);
+      });
+
+      // 渲染动态图表
+      renderCharts(res);
+    }
+
+    function renderCharts(res) {
+      if (pieChartInstance) pieChartInstance.destroy();
+      if (radarChartInstance) radarChartInstance.destroy();
+
+      // 1. 渲染环形饼图 (Pie Chart)
+      const ctxPie = document.getElementById('pieChart').getContext('2d');
+      pieChartInstance = new Chart(ctxPie, {
+        type: 'doughnut',
+        data: {
+          labels: res.pieLabels,
+          datasets: [{
+            data: res.pieData,
+            backgroundColor: ['#C86D51', '#E8A598', '#E5DEC9', '#7A7269'],
+            borderWidth: 2,
+            borderColor: '#FAF7F2'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false } // 关闭默认图例，使用下方我们手写的静态明细
+          }
+        }
+      });
+
+      // 2. 渲染蛛网雷达图 (Radar Chart)
+      const ctxRadar = document.getElementById('radarChart').getContext('2d');
+      radarChartInstance = new Chart(ctxRadar, {
+        type: 'radar',
+        data: {
+          labels: ['神秘感', '亲和力', '拉扯力', '安全感', '高智感'],
+          datasets: [{
+            label: '气场得分',
+            data: res.radarData,
+            backgroundColor: 'rgba(200, 109, 81, 0.2)',
+            borderColor: '#C86D51',
+            pointBackgroundColor: '#C86D51',
+            pointRadius: 3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            r: {
+              angleLines: { color: 'rgba(229, 222, 201, 0.6)' },
+              grid: { color: 'rgba(229, 222, 201, 0.6)' },
+              pointLabels: { font: { size: 10 } },
+              suggestedMin: 0,
+              suggestedMax: 100,
+              ticks: { display: false }
+            }
+          },
+          plugins: {
+            legend: { display: false }
+          }
+        }
+      });
+    }
+
+    function generatePoster() {
+      const posterNode = document.getElementById('report-poster');
+      html2canvas(posterNode, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#FAF7F2"
+      }).then(canvas => {
+        const image = canvas.toDataURL("image/png");
+        const link = document.createElement('a');
+        link.download = `${userData.name}-第一印象图表报告.png`;
+        link.href = image;
+        link.click();
+      });
+    }
+
+    function restartQuiz() {
+      currentQuestion = 0;
+      scores = { cedar: 0, sun: 0, sheep: 0, wood: 0 };
+      answersHistory = [];
+      userData = { name: "", gender: "" };
+      
+      document.getElementById('user-name').value = '';
+      document.getElementById('gender-female').className = "gender-btn py-2.5 px-4 rounded-xl border border-[#E5DEC9] bg-white text-sm font-medium text-[#7A7269] flex items-center justify-center space-x-2 transition-all";
+      document.getElementById('gender-male').className = "gender-btn py-2.5 px-4 rounded-xl border border-[#E5DEC9] bg-white text-sm font-medium text-[#7A7269] flex items-center justify-center space-x-2 transition-all";
+
+      document.getElementById('screen-report').classList.add('hidden');
+      document.getElementById('screen-report').classList.remove('flex');
+      document.getElementById('screen-home').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
